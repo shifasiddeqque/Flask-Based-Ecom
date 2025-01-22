@@ -1,0 +1,7 @@
+/venv
+.env
+__pycache__/
+.Python
+instance/
+.webassets-cache
+migrations/
