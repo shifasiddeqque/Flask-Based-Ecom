@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>My Account</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Account Information</h3>
+                    <p><strong>Username:</strong> {{ current_user.username }}</p>
+                    <p><strong>Email:</strong> {{ current_user.email }}</p>
+                    <a href="{{ url_for('customer.account') }}" class="btn btn-primary">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Edit Profile</h3>
+
+                    <!-- Form to Edit Profile -->
+                    <form method="POST">
+                        {{ form.hidden_tag() }}  <!-- CSRF token for security -->
+
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            {{ form.first_name(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            {{ form.last_name(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            {{ form.phone(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="address_line1" class="form-label">Address Line 1</label>
+                            {{ form.address_line1(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="address_line2" class="form-label">Address Line 2</label>
+                            {{ form.address_line2(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City</label>
+                            {{ form.city(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State</label>
+                            {{ form.state(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="postal_code" class="form-label">Postal Code</label>
+                            {{ form.postal_code(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            {{ form.country(class="form-control") }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

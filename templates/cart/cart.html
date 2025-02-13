@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h2>Your Cart</h2>
+        {% if cart_items %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr data-item-id="{{ item.product.id }}">
+                        {% if item.product.main_image_url %}
+                            <td><img src="{{ url_for('static', filename='uploads/' + item.product.main_image_url) }}" alt="{{ item.product.name }}" style="width: 100px; height: 100px;"></td>
+                        {% else %}
+                            <td><img src="{{ url_for('static', filename='uploads/default_image.jpeg') }}" alt="{{ item.product.name }}" style="width: 100px; height: 100px;"></td>
+                        {% endif %}
+                        <td>{{ item.product.name }} {% if item.variant %} ({{ item.variant.size }}) {% endif %}</td>  <!-- Display product name with variant size if variant exists -->
+                        <td>₹
+                            {% if item.variant %}
+                                {{ item.variant.sale_price if item.variant.sale_price else item.variant.price }}
+                            {% else %}
+                                {{ item.product.sale_price if item.product.sale_price else item.product.price }}
+                            {% endif %}
+                        </td>  <!-- Display price of the selected variant or product -->
+                        <td><span class="quantity">{{ item.quantity }}</span></td>
+                        <td>₹
+                            {% if item.variant %}
+                                {{ (item.variant.sale_price or item.variant.price) * item.quantity }}
+                            {% else %}
+                                {{ item.product.sale_price if item.product.sale_price else item.product.price * item.quantity }}
+                            {% endif %}
+                        </td>  <!-- Total price for this item -->
+                        <td>
+                            <button class="update-cart" data-action="increase" style="font-size: 20px; padding: 5px 10px; margin-right: 5px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">+</button>
+                            <button class="update-cart" data-action="decrease" style="font-size: 20px; padding: 5px 10px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">-</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div>Total Price: <span id="total-price">₹{{ total_price }}</span></div>
+            <div>Total Items: <span id="total-items">{{ cart_items|length }}</span></div>
+            <!-- Checkout Button -->
+            <a href="{{ url_for('checkout.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </div>
+
+    <!-- Include CSRF token in a meta tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Load jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $(document).on('click', '.update-cart', function() {
+            var productId = $(this).closest('tr').data('item-id');
+            var action = $(this).data('action');
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+            // Make an Ajax request to update the cart
+            $.ajax({
+                url: '{{ url_for("cart.update_cart") }}',
+                type: 'POST',
+                data: {
+                    product_id: productId,
+                    action: action,
+                    csrf_token: csrfToken
+                },
+                success: function(response) {
+                        var cartItem = $('[data-item-id="' + productId + '"]');
+                        console.log(JSON.stringify(response));
+                        if (response.updated_quantity === 0) {
+                            // Remove this row from the table
+                            cartItem.remove();
+                            
+                            // Update total items and total price
+                            $('#total-price').text('₹' + parseFloat(response.total_price).toFixed(2));
+                            $('#total-items').text(response.cart_count);
+
+                            if (response.cart_count === 0) {
+                                $('.cart-message').text('Your cart is empty.').show();
+                            }
+                        } else {
+                            var newQuantity = response.updated_quantity;
+                            var productPrice = parseFloat(response.product_price);
+                            var newTotalPrice = (productPrice * newQuantity).toFixed(2);
+
+                            // Update the quantity and total price for that specific product
+                            cartItem.find('.quantity').text(newQuantity);
+                            cartItem.find('td:nth-child(5)').text('₹' + newTotalPrice);
+
+                            if (response.updated_product_total) {
+                                cartItem.find('td:nth-child(5)').text('₹' + parseFloat(response.updated_product_total).toFixed(2));
+                            }
+
+                            // Update overall totals
+                            $('#total-price').text('₹' + parseFloat(response.total_price).toFixed(2));
+                            $('#total-items').text(response.cart_count);
+                        }
+                    },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 403) {
+                        alert('You must be logged in to update the cart.');
+                        window.location.href = '{{ url_for("auth.login") }}';  // Redirect to login page if not authenticated
+                    } else {
+                        console.error('Error updating cart try again!!:', status, error);
+                        alert('Error updating cart.');
+                    }
+                }
+            });
+        });
+    });
+    </script>
+
+    <!-- Preventing reload from resubmitting form -->
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+{% endblock %}

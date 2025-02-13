@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="product-images">
+                <img src="{{ product.main_image_url }}" class="img-fluid main-image mb-3" alt="{{ product.name }}">
+                <div class="row">
+                    {% for image in product.additional_images %}
+                    <div class="col-3">
+                        <img src="{{ image.url }}" class="img-fluid thumbnail" alt="{{ product.name }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h1>{{ product.name }}</h1>
+            <div class="price-section mb-3">
+                <h2>${{ "%.2f"|format(product.price) }}</h2>
+                {% if product.old_price %}
+                <span class="text-muted text-decoration-line-through">${{ "%.2f"|format(product.old_price) }}</span>
+                {% endif %}
+            </div>
+
+            <div class="product-rating mb-3">
+                <div class="stars">
+                    {% for i in range(product.rating|int) %}
+                    <i class="fas fa-star text-warning"></i>
+                    {% endfor %}
+                    {% for i in range(5 - product.rating|int) %}
+                    <i class="far fa-star text-warning"></i>
+                    {% endfor %}
+                </div>
+                <span class="rating-count">({{ product.review_count }} reviews)</span>
+            </div>
+
+            <div class="product-description mb-4">
+                <h3>Description</h3>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <div class="product-details mb-4">
+                <h3>Product Details</h3>
+                <ul class="list-unstyled">
+                    {% for key, value in product.details.items() %}
+                    <li><strong>{{ key }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <form method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" class="mb-4">
+                <div class="form-group mb-3">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}">
+                </div>
+                {% if product.stock > 0 %}
+                <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+                {% else %}
+                <button class="btn btn-secondary btn-lg" disabled>Out of Stock</button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Customer Reviews</h3>
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="review-card mb-3">
+                    <div class="stars mb-2">
+                        {% for i in range(review.rating|int) %}
+                        <i class="fas fa-star text-warning"></i>
+                        {% endfor %}
+                    </div>
+                    <h5>{{ review.title }}</h5>
+                    <p class="text-muted">By {{ review.user.username }} on {{ review.created_at.strftime('%Y-%m-%d') }}</p>
+                    <p>{{ review.content }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No reviews yet.</p>
+            {% endif %}
+
+            {% if current_user.is_authenticated %}
+            <div class="write-review mt-4">
+                <h4>Write a Review</h4>
+                <form method="POST" action="{{ url_for('product.add_review', product_id=product.id) }}">
+                    {{ review_form.hidden_tag() }}
+                    <div class="form-group mb-3">
+                        {{ review_form.rating.label }}
+                        {{ review_form.rating(class="form-control") }}
+                    </div>
+                    <div class="form-group mb-3">
+                        {{ review_form.title.label }}
+                        {{ review_form.title(class="form-control") }}
+                    </div>
+                    <div class="form-group mb-3">
+                        {{ review_form.content.label }}
+                        {{ review_form.content(class="form-control") }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

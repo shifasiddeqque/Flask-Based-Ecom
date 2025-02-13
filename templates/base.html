@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rather Crockery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Default light theme */
+        body.light-mode {
+            background-color: #f8f9fa;
+            color: #000;
+        }
+
+        /* Dark theme */
+        body.dark-mode {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        /* Navbar custom colors */
+        .navbar.light-mode {
+            background-color: #007bff;
+        }
+
+        .navbar.dark-mode {
+            background-color: #495057;
+        }
+
+        /* Change text color for light mode */
+        .navbar.light-mode .navbar-brand, .navbar.light-mode .nav-link, .navbar.light-mode .btn {
+            color: #fff;
+        }
+
+        /* Change text color for dark mode */
+        .navbar.dark-mode .navbar-brand, .navbar.dark-mode .nav-link, .navbar.dark-mode .btn {
+            color: #fff;
+        }
+
+        .navbar-toggler-icon {
+            background-color: white;
+        }
+
+        /* Custom icon for color switcher */
+        .color-switcher {
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* Adjust the order of items on desktop */
+        .navbar-nav.ms-auto {
+            display: flex;
+        }
+
+        /* Desktop: Ensure the color switcher is placed after the Add to Cart button */
+        .color-switcher-container {
+            margin-left: 10px;
+        }
+
+        /* Ensure it does not overlap the toggle button on mobile */
+        .navbar-nav, .navbar-toggler, .color-switcher-container {
+            z-index: 1050;
+        }
+
+        /* Mobile adjustments for the color switcher icon */
+        @media (max-width: 767px) {
+            .navbar-collapse {
+                position: relative;
+            }
+
+            /* Place the color switcher opposite of the toggle button on mobile */
+            .color-switcher-container {
+                margin-left: 10px;
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                pointer-events: auto;
+                z-index: 9999; /* Align to the left */
+            }
+
+            /* Align navbar items to the left in mobile view */
+            .navbar-nav {
+                text-align: left;
+                width: 100%;
+            }
+
+            .navbar-nav .nav-item {
+                text-align: left;
+                padding-left: 15px; /* Add left padding to create space */
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light light-mode position-relative">
+        <div class="container-fluid">
+            <!-- Logo centered on mobile, left-aligned on larger screens -->
+            <a class="navbar-brand d-lg-none mx-auto" href="#">BrandName</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Left-side links for larger screens -->
+                <ul class="navbar-nav ms-auto d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('shop.index') }}">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+
+                <!-- Search form -->
+                <form action="{{ url_for('shop.search') }}" method="GET" class="d-flex mx-2 my-2 my-lg-0">
+                    <input class="form-control me-2" type="search" placeholder="Search" name="q" aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
+
+                <!-- Right-side links for larger screens -->
+                <ul class="navbar-nav ms-auto d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" type="button">
+                            <i class="bi bi-cart-fill"></i> Add to Cart
+                        </button>
+                    </li>
+                    <!-- Color switcher after "Add to Cart" -->
+                    <li class="nav-item">
+                        <div class="color-switcher-container">
+                            <span id="themeSwitcher" class="color-switcher">&#9788;</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <!-- Navbar items on mobile -->
+                <ul class="navbar-nav ms-auto d-lg-none">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" type="button">
+                            <i class="bi bi-cart-fill"></i> Add to Cart
+                        </button>
+                    </li>
+                    <!-- Color switcher after "Add to Cart" on mobile -->
+                    <li class="nav-item">
+                        <div class="color-switcher-container">
+                            <span id="themeSwitcher" class="color-switcher">&#9788;</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <main class="py-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>About Us</h5>
+                    <p>Your trusted online shopping destination.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Contact</h5>
+                    <p>Email: support@example.com</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Optional Bootstrap JS and Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <script>
+        // JavaScript to handle theme switching
+        const themeSwitcher = document.getElementById('themeSwitcher');
+        const body = document.body;
+        const navbar = document.querySelector('.navbar');
+        
+        themeSwitcher.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            navbar.classList.toggle('dark-mode');
+            navbar.classList.toggle('light-mode');
+            
+            // Change icon based on the current theme
+            if (body.classList.contains('dark-mode')) {
+                themeSwitcher.innerHTML = '&#9733;'; // Star icon for dark mode
+            } else {
+                themeSwitcher.innerHTML = '&#9788;'; // Sun icon for light mode
+            }
+        });
+    </script>
+</body>
+</html>
