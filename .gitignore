@@ -1,7 +1,18 @@
-/venv
+# Ignore all __pycache__ directories
+**/__pycache__/
+
+# Ignore the .env file
 .env
-__pycache__/
-.Python
-instance/
-.webassets-cache
-migrations/
+
+# Ignore debug logs
+debug.log
+
+# Ignore migrations folders
+**/migrations/
+
+# Ignore media folders
+media/
+
+# Ignore Python bytecode files
+*.pyc
+*.pyo
