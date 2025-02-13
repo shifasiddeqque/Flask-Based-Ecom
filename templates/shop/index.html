@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Carousel Wrapper -->
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Carousel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Carousel Container -->
+    <div class="carousel-container">
+        <!-- Carousel Slides -->
+        <div class="carousel">
+            <div class="carousel-slide">
+                <img src="{{ url_for('static', filename='uploads/carousal/sample1.webp') }}" alt="Slide 1">
+            </div>
+            <div class="carousel-slide">
+                <img src="{{ url_for('static', filename='uploads/carousal/default_image.jpeg') }}" alt="Slide 2">
+            </div>
+            <div class="carousel-slide">
+                <img src="{{ url_for('static', filename='uploads/carousal/dog.png') }}" alt="Slide 3">
+            </div>
+        </div>
+        <!-- Carousel Dots -->
+        <div class="carousel-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+        <!-- Carousel Controls -->
+        <!-- <button  href="#productCarousel" class="prev">&#10094;</button>
+        <button  href="#productCarousel" class="next">&#10095;</button> -->
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+
+<div class="container">
+    <h1>Shop</h1>
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card position-relative">
+                        <!-- Product Image and Sale Badge -->
+                        <a href="{{ url_for('shop.product_detail', product_id=product.id) }}">
+                            <div class="product-image-container position-relative">
+                                {% if product.main_image_url %}
+                                    <img src="{{ url_for('static', filename='uploads/' + product.main_image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='uploads/default_image.jpeg') }}" class="card-img-top" alt="Default Image">
+                                {% endif %}
+                                
+                                {% if product.sale_price and product.sale_price < product.price %}
+                                    <div class="discount-badge position-absolute top-0 start-0">
+                                        {{ ((product.price - product.sale_price) / product.price * 100) | round(0) }}% OFF
+                                    </div>
+                                {% endif %}
+
+                                <!-- Wishlist Button -->
+                                <button class="btn btn-light wishlist-btn position-absolute top-0 end-0" data-bs-toggle="modal" data-bs-target="#wishlistModal" title="Add to Wishlist">
+                                    <i class="fa fa-heart"></i>
+                                </button>
+                            </div>
+                        </a>
+
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+
+                            <!-- Price, Sale Price, and Discount -->
+                            <div class="d-flex mb-3">
+                                <p class="card-text">
+                                    {% if product.sale_price and product.sale_price < product.price %}
+                                        <span class="original-price" style="text-decoration: line-through;">₹{{ product.price }}</span>
+                                        <span class="sale-price ms-2">₹{{ product.sale_price }}</span>
+                                        <span class="discount ms-2">({{ ((product.price - product.sale_price) / product.price * 100) | round(0) }}% OFF)</span>
+                                    {% else %}
+                                        <strong>₹{{ product.price }}</strong>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        <div id="displayed-price">
+                            {% if product.variants %}
+                                {% set min_price, max_price = product.get_price_range() %}
+                                    <div>Price ₹{{ min_price }} - ₹{{ max_price }}</div>
+                                {% else %}
+                                    <div>Price: ₹{{ product.price }}</div>  <!-- Fallback for products without variants -->
+                                {% endif %}
+                        </div>
+                            <form action="{{ url_for('cart.add_to_cart', product_id=product.id)}}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="product_id" value="{{ product.id }}"> <!-- Ensure product_id is included -->
+                            <!-- Row for Quantity and Variant (with conditional rendering) -->
+                            <div class="d-flex mb-3">
+                                <!-- Quantity Selector (takes 30%) -->
+                                <div class="quantity-container" style="flex: 30%;">
+                                    <input type="number" class="form-control" name="quantity" id="quantity-{{ product.id }}" value="1" min="1" max="100" required>
+                                </div>
+
+                                {% if product.variants and product.variants|length > 0 %}
+                                    <!-- Product Variant Selector (takes 70%) -->
+                                    <div class="variant-container" style="flex: 70%;">
+                                        <select class="form-control" id="variant-{{ product.id }}" name="variant_id" id="variant-select" class="form-control" required>
+                                            {% for variant in product.variants %}
+                                            <option value="{{ variant.id }}" data-price="{{ variant.price }}">
+                                                {{ variant.size }} - ₹{{ variant.price }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                {% else %}
+                                    <!-- If no variants, the quantity takes the full space -->
+                                    <div class="variant-container" style="flex: 100%;">
+
+                                    </div>
+                                {% endif %}
+                            </div>
+                                <div class="input-group mb-3">
+                                    <button class="btn btn-primary add-margin" type="submit">Add to Cart</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p>No products found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination controls -->
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('shop.index', page=pagination.prev_num) }}" class="prev">Previous</a>
+        {% else %}
+            <span class="disabled prev">Previous</span>
+        {% endif %}
+        
+        <span class="pagination-info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        
+        {% if pagination.has_next %}
+            <a href="{{ url_for('shop.index', page=pagination.next_num) }}" class="next">Next</a>
+        {% else %}
+            <span class="disabled next">Next</span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Wishlist Modal -->
+<div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="wishlistModalLabel">Your Wishlist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="wishlist-items">
+          <!-- Wishlist items will be dynamically populated here -->
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Link to the External JavaScript file -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}
+<script>
+    $(document).ready(function () {
+        $('#productCarousel').carousel({
+            interval: 3000,// Optional: Controls the timing of automatic slide change (in milliseconds)
+            pause: 'hover',
+            wrap: true,
+            keyboard: true,
+            touch: true,
+            indicators: true,
+        });
+    });
+</script>

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Main Image Style */
+        .main-image {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            cursor: zoom-in;
+            transition: transform 0.25s ease;
+        }
+
+        /* Thumbnail Image Style */
+        .thumbnail-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 15px;
+            overflow-x: scroll;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+        }
+
+        /* To ensure the zoom-in effect */
+        .zoomed {
+            transform: scale(2);
+            cursor: zoom-out;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-info h2 {
+            margin-bottom: 20px;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d9534f;
+        }
+
+        .sku, .variant-price {
+            font-size: 1.1rem;
+        }
+
+        .add-to-cart-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #218838;
+        }
+
+        .carousel-container {
+            height: 400px;
+        }
+
+        .related-products .card-img-top {
+    width: 100%;
+    height: 250px; /* Fixed height for all images */
+    object-fit: cover; /* Ensure images cover the area without distortion */
+    border-bottom: 1px solid #ddd; /* Optional: Add border to make the card look neat */
+}
+
+.product-card {
+    margin-bottom: 30px;
+}
+
+.card-body {
+    text-align: center;
+}
+
+.card {
+    border: 1px solid #ddd; /* Optional: Add border to make the card stand out */
+    border-radius: 8px; /* Optional: Rounded corners */
+    overflow: hidden; /* Ensures no image overflows the card */
+    transition: box-shadow 0.3s ease; /* Optional: Add hover effect */
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Optional: Hover effect for cards */
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #333;
+}
+        @media (max-width: 768px) {
+            .product-info {
+                padding: 10px;
+            }
+             /* Show "Show More" button on larger screens */
+             .show-more-btn {
+                display: block;
+                margin-top: 31px;
+            }
+            .addButton {
+                margin-top: 7%;
+            }
+            .related-products .card-img-top {
+        height: 200px; /* Adjust height for mobile devices */
+    }
+        }
+        /* For smaller screens (mobile)
+
+/* For larger screens */
+@media (min-width: 769px) {
+    .related-products .card-img-top {
+        height: 250px; /* Larger height for desktop and tablet */
+    }
+}
+
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Left side: Product Image Thumbnails -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <!-- Main Image -->
+            <div class="main-image-container mb-4">
+                {% if product_images[0].image_url %}
+                    <img id="main-image" class="main-image" src="{{ url_for('static', filename='uploads/products/' + product_images[0].image_url) }}" alt="Main Product Image">
+                {% else %}
+                    <img id="main-image" class="main-image" src="{{ url_for('static', filename='uploads/products/default_image.jpeg') }}" alt="Main Product Image">
+                {% endif %}
+            </div>
+
+            <!-- Thumbnails of images -->
+            <div class="thumbnail-container">
+                {% for image in product_images %}
+                    <img class="thumbnail" src="{{ url_for('static', filename='uploads/products/' + image.image_url) }}" alt="Product Image {{ loop.index }}" onclick="changeMainImage('{{ url_for('static', filename='uploads/products/' + image.image_url) }}')">
+                {% endfor %}    
+            </div>
+        </div>
+
+        <!-- Right side: Product Info -->
+        <div class="col-lg-6 col-md-6 col-sm-12 product-info">
+            <h2>{{ product.name }}</h2>
+            <p class="sku">SKU: {{ product.sku }}</p>
+            <p class="price" id="displayed-price">Price: ₹{{ product.price }}</p>
+
+            {% if product.variant_price %}
+                <p class="variant-price">Variant Price: ₹{{ product.variant_price }}</p>
+            {% endif %}
+
+            {% if product.variants and product.variants|length > 0 %}
+                <!-- Product Variant Selector (takes 70%) -->
+                <div class="variant-container" style="flex: 100%;">
+                    <select class="form-control" id="variant-{{ product.id }}" name="variant_id" class="form-control" required>
+                        {% for variant in product.variants %}
+                            <option value="{{ variant.id }}" data-price="{{ variant.price }}">
+                                {{ variant.size }} - ₹{{ variant.price }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% else %}
+                <!-- If no variants, the quantity takes the full space -->
+                <div class="variant-container" style="flex: 100%;">
+
+                </div>
+            {% endif %}
+            <form action="{{ url_for('cart.add_to_cart', product_id=product.id)}}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="product_id" value="{{ product.id }}"> <!-- Ensure product_id is included -->
+                <input type="hidden" name="variant_id" id="variant-id" value="{{ product.variants[0].id if product.variants else product.id }}">
+                <button class="add-to-cart-btn addButton">Add to Cart</button>
+            </form>
+        </div>
+    </div>
+    <!-- Related Products Section -->
+    <div class="related-products mt-5">
+        <h3>Related Products</h3>
+        <div class="row">
+            {% for related_product in related_products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 col-12 product-card">
+                    <div class="card">
+                        {% if related_product.images[0].image_url %}
+                            <img class="card-img-top" src="{{ url_for('static', filename='uploads/products/' + related_product.images[0].image_url) }}" alt="{{ related_product.name }}">
+                        {% else %}
+                            <img class="card-img-top" src="{{ url_for('static', filename='uploads/products/default_image.jpeg') }}" alt="{{ related_product.name }}">
+                        {% endif %}
+                    
+                        <div class="card-body">
+                            <h5 class="card-title">{{ related_product.name }}</h5>
+                            <p class="card-text">₹{{ related_product.price }}</p>
+                            <a href="{{ url_for('shop.product_detail', product_id=related_product.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Show More Button -->
+        <div class="show-more-btn">
+            <button id="show-more-btn" class="btn btn-secondary" onclick="loadMoreRelatedProducts()">Show More</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<script>
+    function changeMainImage(imageUrl) {
+        document.getElementById('main-image').src = imageUrl;
+    }
+    
+    // Zoom In and Out Effect
+    const mainImage = document.getElementById('main-image');
+    const variantSelect = document.getElementById('variant-{{ product.id }}');
+    const variantIdInput = document.getElementById('variant-id');
+    const displayedPrice = document.getElementById('displayed-price');
+    
+    mainImage.addEventListener('click', function() {
+        if (mainImage.classList.contains('zoomed')) {
+            mainImage.classList.remove('zoomed');
+        } else {
+            mainImage.classList.add('zoomed');
+        }
+    });
+    
+    if (variantSelect) {
+        variantSelect.addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
+            var price = selectedOption.getAttribute('data-price');
+            const variantId = selectedOption.value;
+            displayedPrice.innerText = 'Price: ₹' + price;
+            variantIdInput.value = variantId;
+    });
+}
+</script>
+
+
+</body>
+</html>
+{% endblock %}

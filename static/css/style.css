@@ -1,0 +1,503 @@
+/* General Reset */
+/* Media Queries for Responsiveness */
+
+/* For mobile devices */
+@media (max-width: 768px) {
+    .carousel-container {
+        max-width: 100%;
+        margin: 0 10px;
+    }
+
+    button {
+        font-size: 25px;
+        padding: 8px;
+    }
+
+    .carousel-slide img {
+        border-radius: 5px;
+    }
+}
+
+/* For very small devices */
+@media (max-width: 480px) {
+    button {
+        font-size: 20px;
+        padding: 5px;
+    }
+    .carousel-container {
+        height: 300px;  /* Adjust height for mobile screens */
+    }
+    .carousel img {
+        object-fit: contain;  /* Ensure images are fully visible */
+    }
+    /* Adjust the position of the dots for mobile */
+    .carousel-dots {
+        bottom: 10px;  /* Move dots closer to the bottom */
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        margin-left: 100px;
+    }
+    .carousel img {
+        object-fit: contain;  /* Ensure images are fully visible */
+    }
+
+    /* Center the arrows vertically on smaller screens */
+    button {
+        top: 50%;
+        #transform: translateY(-50%);
+    }
+
+    /* Adjust dots for better mobile alignment */
+    .carousel-dots {
+        bottom: 10px;  /* Move dots up slightly for small screens */
+    }
+    .carousel-container {
+        height: 248px !important;  /* Adjust height for medium-sized screens */
+    }
+    .add-margin {
+        margin-top: 18px;
+    }
+}
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 466px;  /* Default height */
+    margin: 0px auto 0; /* Add margin on top */
+    overflow: hidden;
+}
+
+/* Carousel slides */
+.carousel {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    height: 100%; /* Ensure slides take full height */
+    box-sizing: border-box;
+}
+
+/* Ensuring images fit the container */
+.carousel img {
+    width: 100%;
+    height: 100%; /* Maintain height of 466px */
+    object-fit: contain; /* Ensure images are fully visible and not cropped */
+}
+
+/* Carousel Dots */
+.carousel-dots {
+    position: absolute;
+    bottom: 20px; /* Positioned at the bottom of the container */
+    left: 50%;
+    transform: translateX(-50%); /* Center dots horizontally */
+    text-align: center;
+    z-index: 3;  /* Make sure dots are on top of the images */
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    margin: 0 5px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.active {
+    background-color: #717171;
+    border-radius: 20%;
+}
+
+/* Carousel Controls (prev/next buttons) */
+button.prev, button.next {
+    position: absolute;
+    top: 48%;  /* Center vertically */
+    transform: translateY(-50%);  /* Ensure buttons are vertically centered */
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+button.prev {
+    left: 20px;  /* Positioning the previous button */
+}
+
+button.next {
+    right: 20px;  /* Positioning the next button */
+}
+
+/* Pause the carousel on hover */
+.carousel-container:hover .carousel {
+    animation-play-state: paused;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Container for centralizing content */
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styling */
+h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+}
+
+/* Product Cards */
+.card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.card:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+}
+
+/* Product Image Container for Discount Badge */
+.product-image-container {
+    position: relative;
+}
+
+/* Card Body */
+/* Wishlist Button */
+.wishlist-btn {
+    font-size: 20px; /* Adjust icon size */
+    background-color: transparent;
+    border: none;
+    color: #ff4081; /* Heart color */
+    padding: 10px;
+    z-index: 10; /* Ensure it sits above the image */
+}
+
+.wishlist-btn:hover {
+    background-color: rgba(255, 0, 0, 0.7);  /* Red color on hover */
+    color: white;
+}
+
+/* Wishlist Button Hover Text */
+.wishlist-btn:hover .wishlist-tooltip {
+    opacity: 1;
+}
+
+.wishlist-tooltip {
+    position: absolute;
+    top: -30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/* Discount Badge */
+.discount-badge {
+    background-color: rgba(255, 0, 0, 0.7); /* Red background with some transparency */
+    color: white;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 5;
+}
+
+.card-title {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.card-text {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+/* Price Styling */
+.original-price {
+    text-decoration: line-through;
+    color: #777;
+    font-size: 1em;
+    margin-right: 10px;
+}
+
+.sale-price {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.discount-percentage {
+    color: #ff6600;
+    font-size: 1.2em;
+    margin-left: 10px;
+}
+
+/* Quantity and Variant Input in One Row */
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+/* Custom styles for product card layout */
+.card-body {
+    padding: 15px;
+}
+
+.d-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quantity-container, .variant-container {
+    margin-right: 10px;
+}
+
+.original-price {
+    text-decoration: line-through;
+}
+
+.sale-price {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.discount {
+    color: #2ecc71;
+}
+
+input[type="number"], select {
+    width: 100%;
+}
+
+input[type="number"] {
+    max-width: 80px;
+}
+
+select {
+    min-width: 100px;
+}
+
+input.form-control, select.form-control {
+    font-size: 1.1em;
+    padding: 5px;
+}
+
+/* Add to Cart Button */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Pagination Styling */
+/* Pagination Styling */
+/* Pagination container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* Pagination links */
+.pagination a {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 0 5px;
+    text-decoration: none;
+    color: #007bff; /* Link color */
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hover effect on pagination links */
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Active page (current page) */
+.pagination .active {
+    background-color: #007bff;
+    color: white;
+    pointer-events: none; /* Disable clicking on the active page */
+    font-weight: bold;
+}
+
+/* Disabled (Previous/Next) */
+.pagination .disabled {
+    color: #ccc;
+    border-color: #ccc;
+    pointer-events: none;
+}
+
+/* Pagination info */
+.pagination .pagination-info {
+    font-size: 14px;
+    margin: 0 10px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 767px) {
+    .pagination a {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .pagination .pagination-info {
+        font-size: 12px;
+    }
+}
+/* Product Detail Page */
+/* General Layout */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+section {
+    margin: 20px;
+}
+
+.product-info, .additional-details {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-header, .details-header {
+    text-align: center;
+}
+
+h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 22px;
+    color: #333;
+}
+
+.product-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.product-image {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.product-image img {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.product-description {
+    flex: 2;
+}
+
+.product-price {
+    margin-top: 20px;
+}
+
+.product-price p {
+    font-size: 20px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.add-to-cart {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.add-to-cart:hover {
+    background-color: #218838;
+}
+
+.details-content {
+    padding: 10px 0;
+    font-size: 16px;
+    color: #666;
+}
+
+hr {
+    border: 1px solid #ccc;
+    width: 50%;
+    margin: 20px auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-detail {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product-image {
+        margin-bottom: 20px;
+    }
+
+    .product-description {
+        text-align: center;
+    }
+}

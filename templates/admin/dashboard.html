@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <nav class="admin-nav">
+            <h1>Admin Dashboard</h1>
+            <ul>
+                <li><a href="{{ url_for('admin.products') }}">Products</a></li>
+                <li><a href="{{ url_for('admin.orders') }}">Orders</a></li>
+                <li><a href="{{ url_for('admin.users') }}">Users</a></li>
+                <li><a href="{{ url_for('admin.categories') }}">Categories</a></li>
+            </ul>
+        </nav>
+
+        <main class="admin-main">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Total Products</h3>
+                    <p>{{ stats.total_products }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <p>{{ stats.total_orders }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <p>{{ stats.total_users }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Revenue</h3>
+                    <p>${{ "%.2f"|format(stats.total_revenue) }}</p>
+                </div>
+            </div>
+
+            <div class="recent-activity">
+                <h2>Recent Orders</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.user.email }}</td>
+                            <td>${{ "%.2f"|format(order.total) }}</td>
+                            <td>{{ order.status }}</td>
+                            <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="low-stock-products">
+                <h2>Low Stock Products</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Current Stock</th>
+                            <th>Category</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in low_stock_products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.stock }}</td>
+                            <td>{{ product.category.name }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_product', id=product.id) }}" class="btn-edit">Edit</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

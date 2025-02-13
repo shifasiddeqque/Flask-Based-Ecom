@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Payment Details</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Payment Information</h3>
+                    <form method="POST" action="{{ url_for('payment.process_payment') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group mb-3">
+                            {{ form.card_number.label }}
+                            {{ form.card_number(class="form-control") }}
+                            {% for error in form.card_number.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.expiry_date.label }}
+                                    {{ form.expiry_date(class="form-control") }}
+                                    {% for error in form.expiry_date.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.cvv.label }}
+                                    {{ form.cvv(class="form-control") }}
+                                    {% for error in form.cvv.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="mt-4">Shipping Address</h3>
+                        <div class="form-group mb-3">
+                            {{ form.name.label }}
+                            {{ form.name(class="form-control") }}
+                            {% for error in form.name.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group mb-3">
+                            {{ form.address.label }}
+                            {{ form.address(class="form-control") }}
+                            {% for error in form.address.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group mb-3">
+                            {{ form.city.label }}
+                            {{ form.city(class="form-control") }}
+                            {% for error in form.city.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.state.label }}
+                                    {{ form.state(class="form-control") }}
+                                    {% for error in form.state.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.zip_code.label }}
+                                    {{ form.zip_code(class="form-control") }}
+                                    {% for error in form.zip_code.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">Process Payment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Order Summary</h3>
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ item.product.name }} (x{{ item.quantity }})</span>
+                        <span>${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Subtotal:</strong>
+                        <span>${{ "%.2f"|format(subtotal) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <strong>Shipping:</strong>
+                        <span>${{ "%.2f"|format(shipping) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <strong>Tax:</strong>
+                        <span>${{ "%.2f"|format(tax) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong>${{ "%.2f"|format(total) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

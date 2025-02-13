@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 style="text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px;">Review Your Order</h3>
+<div class="checkout-page-container">
+    <div class="checkout-page">
+        <!-- Left Section: Cart Items and Shipping Details -->
+        <div class="checkout-left">
+            <!-- Include CSRF Token in the HTML (meta tag or hidden field) -->
+            <meta name="csrf-token" content="{{ csrf_token() }}">
+            <meta name="cart-id" content="{{ cart_id }}">
+            <!-- Cart Summary Section -->
+            <div class="cart-summary">
+                <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+                <div class="cart-items-container">
+                    <ul class="cart-items">
+                        {% for item in cart.items %}
+                            <li class="cart-item" id="cart-item-{{ item.product_id }}">
+                                <div class="cart-item-image">
+                                    {% if item.product.main_image_url %}
+                                        <img src="{{ url_for('static', filename='uploads/' + item.product.main_image_url) }}" alt="{{ item.product.name }}" style="width: 40px; height: 40px;">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='uploads/default_image.jpeg') }}" alt="{{ item.product.name }}" style="width: 40px; height: 40px;">
+                                    {% endif %}
+                                </div>
+                                <div class="cart-item-details">
+                                    {% if item.variant_id %}
+                                        <p id="{{ item.variant_id }}" class="product-name-variant">{{ item.product.name }} - {{ item.variant.size }}</p>
+                                    {% else %}
+                                        <p id="{{ item.product_id }}" class="product-name">{{ item.product.name }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="cart-item-price-total">
+                                    <p class="cart-item-price">₹{{ item.unit_price }}</p>
+                                    <p class="cart-item-total">₹{{ item.quantity * item.unit_price }}</p>
+                                </div>
+                                <div class="cart-item-quantity">
+                                    <button class="quantity-btn" onclick="changeQuantity({{ item.product_id }}, -1)">-</button>
+                                    <span>{{ item.quantity }}</span>
+                                    <button class="quantity-btn" onclick="changeQuantity({{ item.product_id }}, 1)">+</button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Shipping Address Section -->
+            <div class="shipping-details">
+                <h3>Shipping Address</h3>
+                <div class="address">
+                    <p><strong>{{ customer.first_name }} {{ customer.last_name }}</strong></p>
+                    <p>{{ customer.address_line1 }}, {{ customer.city }}, {{ customer.state }}, {{ customer.zip_code }}</p>
+                    <a href="{{ url_for('auth.update_profile') }}" class="edit-address">Edit Address</a>
+                </div>
+            </div>
+
+            <!-- Apply Coupon Section -->
+            <div class="apply-coupon">
+                <h3>Apply Coupon</h3>
+                <input type="text" name="coupon_code" placeholder="Enter coupon code">
+                <button type="button" class="btn btn-coupon">Apply</button>
+            </div>
+        </div>
+
+        <!-- Right Section: Order Summary and Place Order Button -->
+        <div class="checkout-right">
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div id = "cart-subtotal" class="summary-item">
+                    <span><strong>Subtotal</strong></span>
+                    <span><strong>₹{{ total_amount }}</strong></span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span>₹{{ shipping_fee }}</span>
+                </div>
+                <div id = "cart-tax" class="summary-item">
+                    <span><strong>Tax</strong></span>
+                    <span><strong>₹{{ tax_amount }}</strong></span>
+                </div>
+                
+                <div id = "cart-total" class="summary-item total">
+                    <span><strong>Total</strong></span>
+                    <span><strong>₹{{ total_amount + tax_amount + shipping_fee }}</strong></span>
+                </div>
+                <div class="summary-item">
+                    <span>Estimated Delivery: </span>
+                    <span>{{ estimated_delivery_date }}</span>
+                </div>
+
+                <!-- Continue Button -->
+                <div class="continue-btn">
+                    <button type="button" class="btn btn-primary" onclick="showPaymentMethods()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Payment Methods Section (Initially Hidden) -->
+            <div class="payment-methods" id="payment-methods" style="display: none;">
+                <h3>Choose Payment Method</h3>
+                <div class="payment-method">
+                    <input type="radio" id="cod" name="payment_method" value="COD" checked>
+                    <label for="cod">Cash on Delivery (COD)</label>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" id="card" name="payment_method" value="Card">
+                    <label for="card">Credit/Debit Card</label>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" id="paypal" name="payment_method" value="PayPal">
+                    <label for="paypal">PayPal</label>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" id="upi" name="payment_method" value="UPI">
+                    <label for="upi">UPI</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    // Function to show payment methods after clicking 'Continue'
+    function showPaymentMethods() {
+        document.getElementById('payment-methods').style.display = 'block';
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    // Function to remove item from cart and update totals
+    function removeItem(itemId, csrfToken) {
+    fetch('/cart/remove_from_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ itemId: itemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Handle success (update UI with new totals)
+            const cartItemElement = document.getElementById(`cart-item-${itemId}`);
+            if (cartItemElement) {
+                cartItemElement.remove();
+            }
+            alert(`${data.product_name} has been removed from your cart.`);
+            updateCartTotals(data.updated_totals);
+        } else {
+            alert('There was an issue removing the item from your cart.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('There was a problem with your request.');
+    });
+}
+
+
+    // Function to change item quantity
+    function changeQuantity(itemId, change) {
+    console.log("Change quantity for item " + itemId + " by " + change);
+
+    // Get the CSRF token from the page
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    var cartId = document.querySelector('meta[name="cart-id"]').getAttribute('content');
+    console.log(cartId);
+
+    // Get the current quantity displayed in the UI
+    var quantityElement = document.querySelector('#cart-item-' + itemId + ' .cart-item-quantity span');
+    var currentQuantity = parseInt(quantityElement.textContent);
+
+    // Calculate the new quantity
+    var newQuantity = currentQuantity + change;
+
+    // Prevent quantity from going below 1 (you can set a minimum value of your choice)
+    if (newQuantity < 1) {
+        removeItem(itemId, csrfToken);
+        return;
+    }
+
+    // Update the quantity in the UI
+    quantityElement.textContent = newQuantity;
+
+    // Get the price of the item from the UI
+    var unitPrice = parseFloat(document.querySelector('#cart-item-' + itemId + ' .cart-item-price').textContent.replace('₹', ''));
+    
+    var variantId = document.querySelector('#cart-item-' + itemId + ' .product-name-variant')?.getAttribute('id');
+    
+    // Recalculate the total price for this item
+    var totalPrice = newQuantity * unitPrice;
+    var totalPriceElement = document.querySelector('#cart-item-' + itemId + ' .cart-item-total');
+    totalPriceElement.textContent = '₹' + totalPrice.toFixed(2);
+
+    // Send the updated quantity to the server via fetch()
+    var cartId = document.querySelector('meta[name="cart-id"]').getAttribute('content');
+    fetch('/cart/update_cart_checkout', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+    },
+    body: JSON.stringify({
+            cart: {
+                items: [{
+                    itemId: itemId,
+                    quantity: newQuantity,
+                    unit_price: unitPrice,
+                    variant_id: variantId
+                }]
+            }
+     })
+})
+.then(response => response.json())
+.then(data => {
+    if (data.status === 'success') {
+        // Handle success (update UI with new totals)
+        updateCartTotals(data.cartTotal, data.subtotal, data.tax_amount);
+        console.log('Cart updated successfully');
+    } else {
+        console.error('Error:', data.message);
+    }
+})
+.catch(error => {
+    console.error('Request failed', error);
+});
+
+}
+
+
+function updateCartTotals(cartTotal, subtotal, tax_amount) {
+    cartTotal = parseFloat(cartTotal);
+    subtotal = parseFloat(subtotal);
+    tax_amount = parseFloat(tax_amount);
+
+    document.querySelector('#cart-total span:nth-child(2) strong').textContent = '₹' + cartTotal;
+    document.querySelector('#cart-subtotal span:nth-child(2) strong').textContent = '₹' + subtotal;
+    document.querySelector('#cart-tax span:nth-child(2) strong').textContent = '₹' + tax_amount;
+}
+
+
+</script>
+{% endblock %}
